@@ -4,10 +4,13 @@ import (
 	"net/http"
 
 	"github.com/go-chi/chi/v5"
+	"github.com/go-chi/render"
 )
 
 func (app *application) routes() http.Handler {
 	r := chi.NewRouter()
+
+	r.Use(render.SetContentType(render.ContentTypeJSON))
 
 	r.Route("/v1", func(r chi.Router) {
 		r.Get("/health", app.healthCheck)

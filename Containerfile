@@ -1,4 +1,4 @@
-FROM postgres:16-alpine
+FROM postgres:17-alpine
 
 ENV POSTGRES_DB=boxes
 ENV POSTGRES_PASSWORD=adatbazisjelszo

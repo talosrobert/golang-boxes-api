@@ -38,17 +38,9 @@ func main() {
 
 	app := newApplication(cfg, logger)
 
-	mux := http.NewServeMux()
-	mux.HandleFunc("GET /v1/health", app.healthCheck)
-	mux.HandleFunc("GET /v1/boxes/", app.healthCheck)
-	mux.HandleFunc("POST /v1/boxes/", app.healthCheck)
-	mux.HandleFunc("GET /v1/boxes/:id", app.healthCheck)
-	mux.HandleFunc("PUT /v1/boxes/:id", app.healthCheck)
-	mux.HandleFunc("DELETE /v1/boxes/:id", app.healthCheck)
-
 	srv := http.Server{
 		Addr:         fmt.Sprintf(":%d", cfg.port),
-		Handler:      mux,
+		Handler:      app.routes(),
 		IdleTimeout:  time.Minute,
 		ReadTimeout:  5 * time.Second,
 		WriteTimeout: 10 * time.Second,

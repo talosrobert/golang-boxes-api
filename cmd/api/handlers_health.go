@@ -6,11 +6,22 @@ import (
 	"github.com/go-chi/render"
 )
 
+type Health struct {
+	Status      string `json:"status"`
+	Environment string `json:"environment"`
+	APIVersion  string `json:"api_version"`
+}
+
 type HealthResponse struct {
-	HTTPStatusCode int    `json:"-"`
-	Status         string `json:"status"`
-	Environment    string `json:"environment"`
-	APIVersion     string `json:"api_version"`
+	*Health        `json:"health"`
+	HTTPStatusCode int `json:"-"`
+}
+
+func NewHealthResponse(h *Health, statusCode int) *HealthResponse {
+	return &HealthResponse{
+		Health:         h,
+		HTTPStatusCode: statusCode,
+	}
 }
 
 func (resp *HealthResponse) Render(w http.ResponseWriter, r *http.Request) error {
@@ -18,15 +29,14 @@ func (resp *HealthResponse) Render(w http.ResponseWriter, r *http.Request) error
 	return nil
 }
 
-func HealthRender(env, apiVersion string) render.Renderer {
-	return &HealthResponse{
-		HTTPStatusCode: http.StatusOK,
-		Status:         "available",
-		Environment:    env,
-		APIVersion:     apiVersion,
-	}
-}
-
 func (app *application) healthCheck(w http.ResponseWriter, r *http.Request) {
-	render.Render(w, r, HealthRender("dev", "0.0.1"))
+	resp := NewHealthResponse(
+		&Health{"available", "dev", "0.0.1"},
+		http.StatusOK,
+	)
+
+	if err := render.Render(w, r, resp); err != nil {
+		app.logger.Error("health check response failed", "err", err.Error())
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+	}
 }
